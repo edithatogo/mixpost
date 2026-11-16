@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+permissions:
+  contents: read
+
 jobs:
   run-tests:
     runs-on: ubuntu-latest
@@ -35,11 +38,16 @@ jobs:
     name: P${{ matrix.php }} - L${{ matrix.laravel }}
 
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
         with:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip, pcntl, mysql, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, redis
@@ -50,7 +58,7 @@ jobs:
           sed -i 's/^10.47|^11.0|^12.0/${{ matrix.laravel }}/g' composer.json
 
       - name: Install composer dependencies
-        uses: ramsey/composer-install@v2
+        uses: ramsey/composer-install@1919f6c305aea6ab10e6181a8ddf72317ad77e0e # v2
         env:
           COMPOSER_ROOT_VERSION: dev-main
 
